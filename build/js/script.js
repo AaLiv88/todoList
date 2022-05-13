@@ -1,58 +1,25 @@
-// const mainNoteListElem = document.querySelector(".todo-list");
-// const btnCreateNote = document.querySelector(".create-note__btn");
-//
-// const notesData = new WeakMap();
-//
-// btnCreateNote.onclick = function() {
-//   let note = new Note("123", "123");
-//   note.create();
-//   notesData.set(note, "note");
-// }
-//
-// class TodoList {
-//
-//   constructor(elem) {
-//     elem.
-//   }
-// }
-//
-//
-// // class Note {
-// //
-// //   constructor(title, text) {
-// //     this._title = title;
-// //     this._text = text;
-// //     this._parentElem = mainNoteListElem;
-// //   }
-// //
-// //   create() {
-// //     let note = document.createElement("li");
-// //     note.innerHTML =
-// //       `<article>
-// //           <h2>${this._title}</h2>
-// //           <p>${this._text}</p>
-// //           <ul>
-// //             <li>
-// //               <button data-action="remove">Удалить</button>
-// //             </li>
-// //             <li>
-// //               <button>Редактировать</button>
-// //             </li>
-// //           </ul>
-// //         </article>`
-// //     this._parentElem.append(note);
-// //     note.onclick = this.onClick.bind(this);
-// //   }
-// //
-// //   onClick(event) {
-// //     let action = event.target.dataset.action;
-// //     if (action) this[action]();
-// //   }
-// // }
+
+document.addEventListener("click", function(event) {
+  const target = event.target;
+
+  if (!target.closest("[data-hidden]")) return;
+  const hiddenElem = target.closest("[data-hidden]");
+
+  switch (hiddenElem.dataset.hidden) {
+    case "false":
+      hiddenElem.dataset.hidden = "true";
+      break;
+    case "true":
+      hiddenElem.dataset.hidden = "false";
+      break;
+  }
+
+});
+
+
 
 const modalElem = document.querySelector(".modal");
 const modalOpenBtn = document.querySelector(".btn-create");
-
 
 modalElem.addEventListener("click", function(event) {
   const target = event.target;
@@ -65,7 +32,7 @@ modalElem.addEventListener("click", function(event) {
 
 modalOpenBtn.addEventListener("click", function() {
   modalElem.style.display = "flex";
-})
+});
 
 
 class TodoList {
@@ -77,36 +44,49 @@ class TodoList {
 
     this.form = document.querySelector(".form-create");
     this.form.onsubmit = this.create.bind(this);
+
+    document.onclick = this.onClick.bind(this);
   }
+
 
   init() {
     let todoListText = "";
 
     this.data.forEach(({ title, text, id }) => {
       todoListText += `
-         <li>
           <article class="note" data-id="${id}">
-            <h2>${title}</h2>
-
-            <p>${text}</p>
-
-            <ul>
-              <li>
-                <button data-action="remove">Удалить</button>
-              </li>
-
-              <li>
-                <button>Редактировать</button>
-              </li>
-            </ul>
-
+            <div class="note__wrapper">
+            
+              <h2 class="note__title">${title}</h2>
+  
+              <p class="note__text">${text}</p>
+                  
+              <div class="note__control" data-hidden="true">
+              
+                 <button class="note__open-control">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <use xlink:href="/sprite.svg#svg--icon-three-dots"></use>
+                  </svg>
+                </button>
+                  
+                <ul class="note__buttons">
+                  <li>
+                    <button class="note__btn" data-todo-action="remove">Удалить</button>
+                  </li
+    
+                  <li>
+                    <button class="note__btn" data-todo-action="edit">Редактировать</button>
+                  </li>
+                </ul>
+             
+              </div>
+            
+            </div>
           </article>
-        </li>
       `
     });
 
     this.listElem.innerHTML = todoListText;
-    console.log(this.data);
   }
 
   create() {
@@ -128,13 +108,57 @@ class TodoList {
     localStorage.setItem("JSONData", JSONData);
   }
 
-  //возращяет строку, не делать id числом!
+  remove(note) {
+    const id = note.dataset.id;
+
+    this.data.delete(id);
+
+    this.save();
+    this.init();
+  }
+
+  edit(note) {
+    note.innerHTML = `
+         <form class="note__form" name="edit" action="">
+
+           <label for="note-title">
+             <input name="note-title" id="note-title" type="text">
+           </label>
+
+           <label for="note-text">
+             <input name="note-text" id="note-text" type="text">
+           </label>
+            
+            <button class="note-edit__submit" type="submit">Сохранить</button>
+            <button type="submit">Назад</button>
+         </form>
+    `
+
+    const noteFormElem = note.querySelector(".note__form");
+    noteFormElem.addEventListener("click", () => {
+      console.log(123)
+    });
+
+    let { title, text } = this.data.get(`${note.dataset.id}`);
+    noteFormElem.addEventListener("submit", () => {
+      const newTitle = noteFormElem.elements["note-title"].value;
+      const newText = noteFormElem.elements["note-text"].value;
+
+      title = newTitle;
+      text = newText;
+
+      this.save();
+      this.init();
+    });
+
+  }
+
   getRandomID = this.makeRandomNum(6);
   makeRandomNum(length) {
     let used = []
 
     return function getNum() {
-      const num = Math.random().toFixed(length) * 10 ** length;
+      const num = `${Math.random().toFixed(length)}`.slice(3, length + 2);
 
       if (used.includes(num)) {
         getNum();
@@ -146,14 +170,17 @@ class TodoList {
     }
   }
 
-  onClick() {
-    console.log(123);
+  onClick(event) {
+    const note = event.target.closest(".note");
+    const action = event.target.closest("[data-todo-action]").dataset.todoAction;
+
+    if (!action) return;
+    this[action](note);
   }
 }
 
 const todoList = new TodoList();
 todoList.init();
-localStorage.clear()
 class Note {
   constructor({ title, text, id }) {
     this.title = title;
