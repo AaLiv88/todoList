@@ -19,21 +19,25 @@ modalOpenBtn.addEventListener("click", function() {
 
 
 document.addEventListener("click", function(event) {
+  if (!event.target.closest("[data-hidden]")) {
 
-  const target = event.target;
-  if (!target.closest("[data-hidden]")) return;
+    const hiddenElems = document.querySelectorAll("[data-hidden=false]");
+    hiddenElems.forEach(elem => elem.dataset.hidden = "true");
 
-  const switchableElem = target.closest("[data-hidden]");
-  switch (switchableElem.dataset.hidden) {
-    case "false":
-      switchableElem.dataset.hidden = "true";
-      break;
-    case "true":
-      const hiddenElems = document.querySelectorAll("[data-hidden]");
-      hiddenElems.forEach(elem => elem.dataset.hidden = "true");
+  } else {
 
-      switchableElem.dataset.hidden = "false";
-      break;
+    const switchableElem = event.target.closest("[data-hidden]");
+    switch (switchableElem.dataset.hidden) {
+      case "false":
+        switchableElem.dataset.hidden = "true";
+        break;
+      case "true":
+        const hiddenElems = document.querySelectorAll("[data-hidden=false]");
+        hiddenElems.forEach(elem => elem.dataset.hidden = "true");
+
+        switchableElem.dataset.hidden = "false";
+        break;
+    }
   }
 
 });
