@@ -1,41 +1,9 @@
 
-document.addEventListener("click", function(event) {
-  const target = event.target;
 
-  if (!target.closest("[data-hidden]")) return;
-  const hiddenElem = target.closest("[data-hidden]");
-
-  switch (hiddenElem.dataset.hidden) {
-    case "false":
-      hiddenElem.dataset.hidden = "true";
-      break;
-    case "true":
-      hiddenElem.dataset.hidden = "false";
-      break;
-  }
-
-});
+import { Note } from "./Note.js";
 
 
-
-const modalElem = document.querySelector(".modal");
-const modalOpenBtn = document.querySelector(".btn-create");
-
-modalElem.addEventListener("click", function(event) {
-  const target = event.target;
-
-  if (target.classList.contains("modal__close")) {
-    const modal = target.closest(".modal");
-    modal.style.display = "none";
-  }
-});
-
-modalOpenBtn.addEventListener("click", function() {
-  modalElem.style.display = "flex";
-});
-
-
-class TodoList {
+export class TodoList {
 
   constructor() {
     this.data = new Map(JSON.parse(localStorage.getItem("JSONData")));
@@ -47,7 +15,6 @@ class TodoList {
 
     document.onclick = this.onClick.bind(this);
   }
-
 
   init() {
     let todoListText = "";
@@ -139,16 +106,18 @@ class TodoList {
       console.log(123)
     });
 
-    let { title, text } = this.data.get(`${note.dataset.id}`);
+    let noteObj = this.data.get(`${note.dataset.id}`);
     noteFormElem.addEventListener("submit", () => {
       const newTitle = noteFormElem.elements["note-title"].value;
       const newText = noteFormElem.elements["note-text"].value;
 
-      title = newTitle;
-      text = newText;
+      noteObj.title = newTitle;
+      noteObj.text = newText;
 
       this.save();
       this.init();
+
+      return false;
     });
 
   }
@@ -171,20 +140,11 @@ class TodoList {
   }
 
   onClick(event) {
+    if (!event.target.closest("[data-todo-action]")) return;
+
     const note = event.target.closest(".note");
     const action = event.target.closest("[data-todo-action]").dataset.todoAction;
 
-    if (!action) return;
     this[action](note);
-  }
-}
-
-const todoList = new TodoList();
-todoList.init();
-class Note {
-  constructor({ title, text, id }) {
-    this.title = title;
-    this.text = text;
-    this.id = id;
   }
 }

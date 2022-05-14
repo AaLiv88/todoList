@@ -1,4 +1,4 @@
-class Note {
+export class Note {
   constructor({ title, text, id }) {
     this.title = title;
     this.text = text;
