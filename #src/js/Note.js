@@ -1,17 +1,14 @@
 
 
 export class Note {
-  constructor({ title, text, id }, parentElem) {
-    this.parentElem = parentElem;
+  constructor({ title, text, id }, parentTodoList) {
+    this.parentTodoList = parentTodoList;
 
     this.title = title;
     this.text = text;
     this.id = id;
 
-    document.onclick = this.onClick.bind(this);
-    // this.noteElem = document.querySelector(`[data-id=${this.id}]`);
-    // this.noteElem.onclick = this.onClick.bind(this);
-    // document.onclick = this.onClick.bind(this);
+    document.addEventListener("click", this.onClick.bind(this));
   }
 
   onClick(event) {
@@ -26,13 +23,14 @@ export class Note {
   remove(note) {
     const id = note.dataset.id;
 
-    this.parentElem.data.delete(id);
-
-    this.parentElem.save();
-    this.parentElem.init();
+    this.parentTodoList.data.delete(id);
+    this.parentTodoList.save();
+    this.parentTodoList.init();
   }
 
   edit(note) {
+    const noteHtmlBefore = note.innerHTML;
+
     note.innerHTML = `
          <form class="note__form" name="edit" action="">
 
@@ -44,30 +42,34 @@ export class Note {
              <input name="note-text" id="note-text" type="text">
            </label>
 
-            <button class="note-edit__submit" type="submit">Сохранить</button>
-            <button type="submit">Назад</button>
+            <button class="note-edit__submit" data-note-form="save" type="button">Сохранить</button>
+            <button data-note-form="back" type="button">Назад</button>
          </form>
-    `
+    `;
 
     const noteFormElem = note.querySelector(".note__form");
-    noteFormElem.addEventListener("click", () => {
-      console.log(123)
-    });
+    const noteObj = this.parentTodoList.data.get(`${note.dataset.id}`);
 
-    let noteObj = this.parentElem.data.get(`${note.dataset.id}`);
-    noteFormElem.addEventListener("submit", () => {
-      const newTitle = noteFormElem.elements["note-title"].value;
-      const newText = noteFormElem.elements["note-text"].value;
+    noteFormElem.addEventListener("click", (event) => {
+      const target = event.target.dataset.noteForm;
 
-      noteObj.title = newTitle;
-      noteObj.text = newText;
+      if (target === "save") {
+        const newTitle = noteFormElem.elements["note-title"].value;
+        const newText = noteFormElem.elements["note-text"].value;
 
-      this.parentElem.save();
-      this.parentElem.init();
+        noteObj.title = newTitle;
+        noteObj.text = newText;
 
-      return false;
+        this.parentTodoList.save();
+        this.parentTodoList.init();
+
+      } else if (target === "back") {
+        note.innerHTML = noteHtmlBefore;
+      } else return;
+
     });
 
   }
+
 
 }
