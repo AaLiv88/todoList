@@ -1,6 +1,7 @@
 
 
 import { Note } from "./Note.js";
+import { getUniqueNum } from "./getUniqueNum.js";
 
 
 export class TodoList {
@@ -12,7 +13,25 @@ export class TodoList {
 
     this.form = document.querySelector(".form-create");
     this.form.onsubmit = this.create.bind(this);
+    // document.addEventListener("click", this.onClick.bind(this));
   }
+
+  // onClick(event) {
+  //   if (!event.target.closest("[data-note-action]")) return;
+  //
+  //   const note = event.target.closest(".note");
+  //   const action = event.target.closest("[data-note-action]").dataset.noteAction;
+  //
+  //   this[action](note);
+  // }
+
+  // remove(note) {
+  //   const id = note.dataset.id;
+  //
+  //   this.data.delete(id);
+  //   this.save();
+  //   this.init();
+  // }
 
   init() {
     let todoListText = "";
@@ -55,8 +74,8 @@ export class TodoList {
       `
     });
 
-    console.log(this.data);
     this.listElem.innerHTML = todoListText;
+    console.log(this.data);
   }
 
   save() {
@@ -64,6 +83,7 @@ export class TodoList {
     localStorage.setItem("JSONData", JSONData);
   }
 
+  getRandomID = getUniqueNum(6);
   create() {
     let noteObj = {
       title: this.form.elements["note-title"].value,
@@ -76,24 +96,6 @@ export class TodoList {
     this.init();
 
     return false;
-  }
-
-
-  getRandomID = this.makeRandomNum(6);
-  makeRandomNum(length) {
-    let used = []
-
-    return function getNum() {
-      const num = `${Math.random().toFixed(length)}`.slice(3, length + 2);
-
-      if (used.includes(num)) {
-        getNum();
-      } else {
-        used.push(num);
-        return num;
-      }
-
-    }
   }
 
 }
