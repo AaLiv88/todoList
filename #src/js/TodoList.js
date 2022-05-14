@@ -12,14 +12,16 @@ export class TodoList {
 
     this.form = document.querySelector(".form-create");
     this.form.onsubmit = this.create.bind(this);
-
-    document.onclick = this.onClick.bind(this);
   }
 
   init() {
     let todoListText = "";
 
-    this.data.forEach(({ title, text, id }) => {
+    this.data.forEach((noteObj) => {
+      noteObj = new Note(noteObj, this);
+      this.data.set(noteObj.id, noteObj);
+
+      const { title, text, id } = noteObj;
       todoListText += `
           <article class="note" data-id="${id}">
             <div class="note__wrapper">
@@ -38,11 +40,11 @@ export class TodoList {
                   
                 <ul class="note__buttons">
                   <li>
-                    <button class="note__btn" data-todo-action="remove">Удалить</button>
+                    <button class="note__btn" data-note-action="remove">Удалить</button>
                   </li
     
                   <li>
-                    <button class="note__btn" data-todo-action="edit">Редактировать</button>
+                    <button class="note__btn" data-note-action="edit">Редактировать</button>
                   </li>
                 </ul>
              
@@ -53,7 +55,13 @@ export class TodoList {
       `
     });
 
+    console.log(this.data);
     this.listElem.innerHTML = todoListText;
+  }
+
+  save() {
+    const JSONData = JSON.stringify(Array.from(this.data));
+    localStorage.setItem("JSONData", JSONData);
   }
 
   create() {
@@ -63,64 +71,13 @@ export class TodoList {
       id: this.getRandomID(),
     }
 
-    this.data.set(`${noteObj.id}`, new Note(noteObj));
+    this.data.set(`${noteObj.id}`, new Note(noteObj, this));
     this.save();
     this.init();
 
     return false;
   }
 
-  save() {
-    const JSONData = JSON.stringify(Array.from(this.data));
-    localStorage.setItem("JSONData", JSONData);
-  }
-
-  remove(note) {
-    const id = note.dataset.id;
-
-    this.data.delete(id);
-
-    this.save();
-    this.init();
-  }
-
-  edit(note) {
-    note.innerHTML = `
-         <form class="note__form" name="edit" action="">
-
-           <label for="note-title">
-             <input name="note-title" id="note-title" type="text">
-           </label>
-
-           <label for="note-text">
-             <input name="note-text" id="note-text" type="text">
-           </label>
-            
-            <button class="note-edit__submit" type="submit">Сохранить</button>
-            <button type="submit">Назад</button>
-         </form>
-    `
-
-    const noteFormElem = note.querySelector(".note__form");
-    noteFormElem.addEventListener("click", () => {
-      console.log(123)
-    });
-
-    let noteObj = this.data.get(`${note.dataset.id}`);
-    noteFormElem.addEventListener("submit", () => {
-      const newTitle = noteFormElem.elements["note-title"].value;
-      const newText = noteFormElem.elements["note-text"].value;
-
-      noteObj.title = newTitle;
-      noteObj.text = newText;
-
-      this.save();
-      this.init();
-
-      return false;
-    });
-
-  }
 
   getRandomID = this.makeRandomNum(6);
   makeRandomNum(length) {
@@ -139,12 +96,4 @@ export class TodoList {
     }
   }
 
-  onClick(event) {
-    if (!event.target.closest("[data-todo-action]")) return;
-
-    const note = event.target.closest(".note");
-    const action = event.target.closest("[data-todo-action]").dataset.todoAction;
-
-    this[action](note);
-  }
 }
