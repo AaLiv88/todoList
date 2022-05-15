@@ -1,7 +1,7 @@
 
 
 import { Note } from "./Note.js";
-import { getUniqueNum } from "./getUniqueNum.js";
+import { getUniqueNum } from "../getUniqueNum.js";
 
 
 export class TodoList {
@@ -12,26 +12,8 @@ export class TodoList {
     this.listElem = document.querySelector(".todo-list");
 
     this.form = document.querySelector(".form-create");
-    this.form.onsubmit = this.create.bind(this);
-    // document.addEventListener("click", this.onClick.bind(this));
+    this.form.onsubmit = this.createNoteObj.bind(this);
   }
-
-  // onClick(event) {
-  //   if (!event.target.closest("[data-note-action]")) return;
-  //
-  //   const note = event.target.closest(".note");
-  //   const action = event.target.closest("[data-note-action]").dataset.noteAction;
-  //
-  //   this[action](note);
-  // }
-
-  // remove(note) {
-  //   const id = note.dataset.id;
-  //
-  //   this.data.delete(id);
-  //   this.save();
-  //   this.init();
-  // }
 
   init() {
     let todoListText = "";
@@ -84,7 +66,7 @@ export class TodoList {
   }
 
   getRandomID = getUniqueNum(6);
-  create() {
+  createNoteObj() {
     let noteObj = {
       title: this.form.elements["note-title"].value,
       text: this.form.elements["note-text"].value,

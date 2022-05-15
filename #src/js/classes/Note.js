@@ -11,6 +11,42 @@ export class Note {
     document.addEventListener("click", this.onClick.bind(this));
   }
 
+  createNoteElem() {
+    let noteElem = document.createElement("article");
+    noteElem.innerHTML = `
+            <article class="note" data-id="${id}">
+            <div class="note__wrapper">
+            
+              <h2 class="note__title">${title}</h2>
+  
+              <p class="note__text">${text}</p>
+                  
+              <div class="note__control" data-hidden="true">
+              
+                 <button class="note__open-control">
+                  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <use xlink:href="/sprite.svg#svg--icon-three-dots"></use>
+                  </svg>
+                </button>
+                  
+                <ul class="note__buttons">
+                  <li>
+                    <button class="note__btn" data-note-action="remove">Удалить</button>
+                  </li
+    
+                  <li>
+                    <button class="note__btn" data-note-action="edit">Редактировать</button>
+                  </li>
+                </ul>
+             
+              </div>
+            
+            </div>
+          </article>
+    `;
+    return noteElem;
+  }
+
   onClick(event) {
     if (!event.target.closest("[data-note-action]")) return;
 
@@ -25,7 +61,8 @@ export class Note {
 
     this.parentTodoList.data.delete(id);
     this.parentTodoList.save();
-    this.parentTodoList.init();
+
+    note.remove();
   }
 
   edit(note) {
@@ -33,15 +70,12 @@ export class Note {
 
     note.innerHTML = `
          <form class="note__form" name="edit" action="">
-
            <label for="note-title">
              <input name="note-title" id="note-title" type="text">
            </label>
-
            <label for="note-text">
              <input name="note-text" id="note-text" type="text">
            </label>
-
             <button class="note-edit__submit" data-note-form="save" type="button">Сохранить</button>
             <button data-note-form="back" type="button">Назад</button>
          </form>
